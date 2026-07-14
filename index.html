@@ -687,6 +687,139 @@ nav.bottom{
   line-height:1.65;
 }
 
+
+/* 홈 화면 추가 안내 */
+.install-card{
+  margin:0 0 18px;
+  padding:16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  background:linear-gradient(145deg,#FFFFFF,#F0F9F4);
+  border:1px solid rgba(107,191,138,.22);
+  border-radius:22px;
+  box-shadow:var(--shadow-sm);
+}
+.install-card-icon{
+  width:54px;
+  height:54px;
+  flex:0 0 54px;
+  border-radius:17px;
+  display:grid;
+  place-items:center;
+  font-size:27px;
+  background:var(--greenTint);
+  box-shadow:inset 0 0 0 1px rgba(107,191,138,.18);
+}
+.install-card-copy{flex:1;min-width:0;}
+.install-card-title{
+  margin:0 0 4px;
+  font-size:15px;
+  font-weight:900;
+  color:var(--ink);
+}
+.install-card-desc{
+  margin:0;
+  color:var(--sub);
+  font-size:12px;
+  line-height:1.55;
+}
+.install-btn{
+  flex:0 0 auto;
+  min-height:42px;
+  padding:0 14px;
+  border:0;
+  border-radius:14px;
+  color:#fff;
+  font-weight:900;
+  background:linear-gradient(145deg,var(--green),#58AE78);
+  box-shadow:0 8px 18px rgba(88,174,120,.23);
+}
+.install-btn:active{transform:translateY(2px) scale(.985);}
+.install-sheet{
+  position:fixed;
+  inset:0;
+  z-index:80;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:16px;
+  background:rgba(28,44,34,.42);
+  backdrop-filter:blur(8px);
+}
+.install-sheet-box{
+  width:min(100%,520px);
+  background:#fff;
+  border-radius:26px;
+  padding:22px;
+  box-shadow:var(--shadow-lg);
+  animation:sheetUp .28s ease both;
+}
+.install-sheet-handle{
+  width:42px;height:5px;
+  border-radius:999px;
+  margin:0 auto 16px;
+  background:#D8DED9;
+}
+.install-sheet-title{
+  margin:0 0 8px;
+  font-size:20px;
+  font-weight:900;
+  text-align:center;
+}
+.install-sheet-text{
+  margin:0 0 16px;
+  color:var(--sub);
+  font-size:13px;
+  line-height:1.7;
+  text-align:center;
+}
+.install-steps{
+  display:grid;
+  gap:10px;
+  margin-bottom:16px;
+}
+.install-step{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:12px 13px;
+  border-radius:15px;
+  background:#F8FAF8;
+  border:1px solid var(--line);
+}
+.install-step-num{
+  width:28px;height:28px;
+  flex:0 0 28px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:var(--green);
+  color:#fff;
+  font-weight:900;
+  font-size:12px;
+}
+.install-step b{display:block;margin-bottom:2px;}
+.install-step span{font-size:12px;color:var(--sub);line-height:1.55;}
+.install-close{
+  width:100%;
+  min-height:48px;
+  border:0;
+  border-radius:15px;
+  background:var(--ink);
+  color:#fff;
+  font-weight:900;
+}
+@keyframes sheetUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:none}
+}
+@media(max-width:480px){
+  .install-card{align-items:flex-start;flex-wrap:wrap;}
+  .install-card-copy{min-width:calc(100% - 68px);}
+  .install-btn{width:100%;}
+}
+
 </style>
 </head>
 <body>
@@ -876,6 +1009,16 @@ function stampHtml(score, size){
 function renderList(){
   const kgs = data.kindergartens;
   let html = "";
+  if(!isStandaloneMode()){
+    html += `<section class="install-card" id="installCard">
+      <div class="install-card-icon">📲</div>
+      <div class="install-card-copy">
+        <h2 class="install-card-title">홈 화면에 추가</h2>
+        <p class="install-card-desc">자주 사용한다면 아이콘을 홈 화면에 추가해 앱처럼 바로 열 수 있어요.</p>
+      </div>
+      <button class="install-btn" id="installGuideBtn">추가 방법</button>
+    </section>`;
+  }
   html += `<div class="toolbar">
     <button class="tool-btn" id="exportBtn">📒 내보내기</button>
     <button class="tool-btn" id="importBtn">📂 불러오기</button>
@@ -1236,6 +1379,9 @@ function bindEvents(){
     });
   });
 
+  const installGuideBtn = document.getElementById("installGuideBtn");
+  if(installGuideBtn) installGuideBtn.addEventListener("click", handleInstallAction);
+
   const exportBtn = document.getElementById("exportBtn");
   if(exportBtn) exportBtn.addEventListener("click", exportData);
   const importBtn = document.getElementById("importBtn");
@@ -1435,6 +1581,95 @@ function toast(msg){
   clearTimeout(toast._t);
   toast._t = setTimeout(()=>{ root.innerHTML=""; }, 3000);
 }
+
+
+/* ============ 홈 화면 추가 안내 ============ */
+let deferredInstallPrompt = null;
+
+function isStandaloneMode(){
+  return window.matchMedia("(display-mode: standalone)").matches ||
+         window.navigator.standalone === true;
+}
+
+function getDeviceType(){
+  const ua = navigator.userAgent || "";
+  if(/iPad|iPhone|iPod/.test(ua) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1)) return "ios";
+  if(/Android/i.test(ua)) return "android";
+  return "other";
+}
+
+window.addEventListener("beforeinstallprompt", (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+});
+
+async function handleInstallAction(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    try{ await deferredInstallPrompt.userChoice; }catch(e){}
+    deferredInstallPrompt = null;
+    return;
+  }
+  showInstallGuide();
+}
+
+function showInstallGuide(){
+  const device = getDeviceType();
+  let title = "홈 화면에 추가하는 방법";
+  let text = "사용 중인 브라우저 메뉴에서 홈 화면 추가 기능을 선택해 주세요.";
+  let steps = [];
+
+  if(device==="ios"){
+    title = "아이폰 홈 화면에 추가";
+    text = "아이폰은 보안상 자동 설치가 불가능해 Safari에서 아래 순서로 한 번만 추가해야 합니다.";
+    steps = [
+      ["1","Safari에서 열기","카카오톡 안 브라우저가 아니라 Safari로 이 페이지를 열어 주세요."],
+      ["2","공유 버튼 누르기","화면 아래의 네모 위로 화살표 모양 공유 버튼을 누르세요."],
+      ["3","홈 화면에 추가","메뉴에서 ‘홈 화면에 추가’를 선택한 뒤 오른쪽 위 ‘추가’를 누르세요."]
+    ];
+  }else if(device==="android"){
+    title = "안드로이드 홈 화면에 추가";
+    text = "Chrome에서 아래 순서로 추가하면 앱처럼 바로 실행할 수 있습니다.";
+    steps = [
+      ["1","Chrome에서 열기","현재 페이지를 Chrome 브라우저에서 열어 주세요."],
+      ["2","점 3개 메뉴","오른쪽 위 점 3개 메뉴를 누르세요."],
+      ["3","홈 화면에 추가","‘홈 화면에 추가’ 또는 ‘앱 설치’를 누른 뒤 확인하세요."]
+    ];
+  }else{
+    steps = [
+      ["1","브라우저 메뉴 열기","Chrome, Edge 또는 Safari의 공유·설정 메뉴를 여세요."],
+      ["2","홈 화면 또는 앱 설치","‘홈 화면에 추가’나 ‘앱 설치’ 항목을 선택하세요."]
+    ];
+  }
+
+  const root = document.getElementById("modalRoot");
+  root.innerHTML = `<div class="install-sheet" id="installSheet">
+    <div class="install-sheet-box" role="dialog" aria-modal="true" aria-labelledby="installSheetTitle">
+      <div class="install-sheet-handle"></div>
+      <h2 class="install-sheet-title" id="installSheetTitle">${title}</h2>
+      <p class="install-sheet-text">${text}</p>
+      <div class="install-steps">
+        ${steps.map(s=>`<div class="install-step">
+          <div class="install-step-num">${s[0]}</div>
+          <div><b>${s[1]}</b><span>${s[2]}</span></div>
+        </div>`).join("")}
+      </div>
+      <button class="install-close" id="installCloseBtn">확인</button>
+    </div>
+  </div>`;
+
+  document.getElementById("installCloseBtn").addEventListener("click", closeModal);
+  document.getElementById("installSheet").addEventListener("click",(e)=>{
+    if(e.target.id==="installSheet") closeModal();
+  });
+}
+
+window.addEventListener("appinstalled", ()=>{
+  deferredInstallPrompt = null;
+  toast("✅ 홈 화면에 추가됐어요.");
+  render();
+});
+
 
 document.getElementById("importFileInput").addEventListener("change", (e)=>{
   const file = e.target.files[0];
