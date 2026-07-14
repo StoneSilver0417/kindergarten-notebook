@@ -12,6 +12,11 @@ const manifest = JSON.parse(read("manifest.webmanifest"));
 new Function(app);
 new Function(serviceWorker);
 
+assert.match(app, /\(cat\.items\.length\*5\)/, "미입력 항목을 제외한 평균으로 영역 만점을 부여하면 안 됩니다");
+assert.match(app, /label:"사전확인"/, "공시자료 확인 유형 표기가 필요합니다");
+assert.match(app, /다툼·상처·사고를 기준에 따라 신속히 공유한다/, "사고 통보 평가 항목이 필요합니다");
+assert.match(app, /방학 중 돌봄·급식 운영이 우리 생활과 맞다/, "방학 돌봄 평가 항목이 필요합니다");
+
 assert.match(html, /href="\.\/styles\.css"/);
 assert.match(html, /src="\.\/app\.js"/);
 assert.doesNotMatch(html, /<style(?:\s|>)/i);
