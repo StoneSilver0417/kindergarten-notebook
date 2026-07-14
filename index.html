@@ -1042,6 +1042,79 @@ nav.bottom{
   font-weight:900;
 }
 
+
+/* 유치원 목록 액션 및 이름 입력 모달 */
+.kg-card{
+  position:relative;
+}
+.kg-card-actions{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+}
+.kg-action-btn{
+  min-height:38px;
+  padding:0 12px;
+  border-radius:12px;
+  border:1px solid rgba(107,191,138,.18);
+  background:#F8FAF8;
+  color:var(--greenDark);
+  font-size:12px;
+  font-weight:900;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  transition:transform .12s ease,box-shadow .18s ease,background .18s ease;
+}
+.kg-action-btn:active{
+  transform:translateY(2px) scale(.985);
+}
+.kg-action-btn.danger{
+  color:var(--coral);
+  background:var(--coralTint);
+  border-color:rgba(221,107,87,.22);
+}
+.kg-card-main{
+  flex:1;
+  min-width:0;
+}
+.kg-card-open{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  width:100%;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:inherit;
+  text-align:left;
+}
+.kg-card-shell{
+  padding:16px;
+}
+.name-modal-input{
+  width:100%;
+  min-height:48px;
+  border-radius:14px;
+  border:1.5px solid var(--line);
+  padding:0 14px;
+  font-size:16px;
+  font-weight:800;
+  background:#fff;
+}
+.name-modal-input:focus{
+  outline:none;
+  border-color:var(--green);
+  box-shadow:0 0 0 4px rgba(107,191,138,.13);
+}
+@media(max-width:430px){
+  .kg-card-shell{padding:15px 13px;}
+  .kg-card-open{gap:11px;}
+  .kg-card-actions{margin-top:11px;}
+  .kg-action-btn{flex:1;}
+}
+
 </style>
 </head>
 <body>
@@ -1247,19 +1320,27 @@ function renderList(){
     const total = totalScore(kg);
     const dq = disqCount(kg);
     const filled = filledCount(kg);
-    html += `<button class="card kg-card" data-open="${kg.id}">
-      ${stampHtml(total,64)}
-      <div style="flex:1; min-width:0;">
-        <div class="jua kg-name" style="color:${kg.name?'var(--ink)':'var(--sub)'}">${esc(kg.name)||'이름 미입력'}</div>
-        <div class="kg-meta">
-          <span>평가 ${filled}/${TOTAL_ITEMS}</span>
-          ${kg.firstImpression>0?`<span style="color:#C9971C">${'★'.repeat(kg.firstImpression)}</span>`:''}
-          ${dq>0?`<span style="color:var(--coral); font-weight:700;">결격 ${dq}건</span>`:''}
-          ${kg.finalQ===3?`<span style="color:var(--green); font-weight:700;">“바로 선택!”</span>`:''}
+    const isBlank = !kg.name && filled===0 && !kg.memo && Object.keys(kg.info||{}).length===0 && Object.values(kg.disq||{}).every(v=>!v);
+    html += `<article class="card kg-card kg-card-shell">
+      <button class="kg-card-open" data-open="${kg.id}" aria-label="${esc(kg.name)||'이름 미입력'} 기록 열기">
+        ${stampHtml(total,64)}
+        <div class="kg-card-main">
+          <div class="jua kg-name" style="color:${kg.name?'var(--ink)':'var(--sub)'}">${esc(kg.name)||'이름 미입력'}</div>
+          <div class="kg-meta">
+            <span>평가 ${filled}/${TOTAL_ITEMS}</span>
+            ${kg.firstImpression>0?`<span style="color:#C9971C">${'★'.repeat(kg.firstImpression)}</span>`:''}
+            ${dq>0?`<span style="color:var(--coral); font-weight:700;">결격 ${dq}건</span>`:''}
+            ${kg.finalQ===3?`<span style="color:var(--green); font-weight:700;">바로 선택</span>`:''}
+            ${isBlank?`<span style="color:var(--coral); font-weight:800;">미작성</span>`:''}
+          </div>
         </div>
+        <span class="chev">${icon("chevron","icon-sm")}</span>
+      </button>
+      <div class="kg-card-actions">
+        <button class="kg-action-btn" data-rename="${kg.id}">${icon("notebook","icon-sm")} 이름 수정</button>
+        <button class="kg-action-btn danger" data-delete-list="${kg.id}">${icon("trash","icon-sm")} 삭제</button>
       </div>
-      <span class="chev">›</span>
-    </button>`;
+    </article>`;
   });
   html += `<button class="add-btn jua" id="addKgBtn">유치원 추가</button>`;
   html += `<p class="hint">방문 전엔 <b>유치원알리미</b>에서 원비·학급 인원·교사 근속을 미리 확인하고,
@@ -1594,6 +1675,20 @@ function bindEvents(){
     });
   });
 
+  main.querySelectorAll("[data-rename]").forEach(el=>{
+    el.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      showKgNameModal({ mode:"rename", id:el.dataset.rename });
+    });
+  });
+
+  main.querySelectorAll("[data-delete-list]").forEach(el=>{
+    el.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      showListDeleteModal(el.dataset.deleteList);
+    });
+  });
+
   const installGuideBtn = document.getElementById("installGuideBtn");
   if(installGuideBtn) installGuideBtn.addEventListener("click", handleInstallAction);
 
@@ -1604,10 +1699,7 @@ function bindEvents(){
 
   const addBtn = document.getElementById("addKgBtn");
   if(addBtn) addBtn.addEventListener("click", ()=>{
-    const kg = newKg();
-    data.kindergartens.push(kg);
-    selId = kg.id; view="detail"; detailTab="score"; confirmDel=false;
-    save(); render();
+    showKgNameModal({ mode:"add" });
   });
 
   const nameInput = document.getElementById("kgNameInput");
@@ -1697,6 +1789,102 @@ function bindEvents(){
     data.kindergartens = data.kindergartens.filter(k=>k.id!==selId);
     view="list"; confirmDel=false;
     save(); render();
+  });
+}
+
+
+/* ============ 유치원 추가·수정·삭제 모달 ============ */
+function showKgNameModal({mode, id}){
+  const isAdd = mode === "add";
+  const kg = id ? getKg(id) : null;
+  const currentName = kg ? kg.name : "";
+  const title = isAdd ? "유치원 추가" : "유치원 이름 수정";
+  const desc = isAdd
+    ? "이름을 입력한 뒤 추가하면 목록에 저장됩니다. 취소하면 빈 기록이 생기지 않습니다."
+    : "목록과 비교 화면에 표시될 이름을 수정합니다.";
+
+  document.getElementById("modalRoot").innerHTML = `
+  <div class="modal-backdrop" id="nameModalBackdrop">
+    <div class="modal-box">
+      <div class="modal-title jua">${title}</div>
+      <div class="modal-body">${desc}</div>
+      <input class="name-modal-input" id="nameModalInput" value="${esc(currentName)}" placeholder="예: 푸른숲유치원" maxlength="40">
+      <div class="modal-actions" style="margin-top:16px;">
+        <button class="confirm" id="nameModalSave">${isAdd ? "추가" : "저장"}</button>
+        <button class="cancel" id="nameModalCancel">취소</button>
+      </div>
+    </div>
+  </div>`;
+
+  const input = document.getElementById("nameModalInput");
+  const saveBtn = document.getElementById("nameModalSave");
+  input.focus();
+  input.select();
+
+  function submit(){
+    const name = input.value.trim();
+    if(!name){
+      toast("이름을 입력해 주세요.");
+      input.focus();
+      return;
+    }
+    if(isAdd){
+      const newItem = newKg();
+      newItem.name = name;
+      touch(newItem);
+      data.kindergartens.push(newItem);
+      selId = newItem.id;
+      view = "detail";
+      detailTab = "score";
+      confirmDel = false;
+      save();
+      closeModal();
+      render();
+    }else if(kg){
+      kg.name = name;
+      touch(kg);
+      save();
+      closeModal();
+      render();
+    }
+  }
+
+  saveBtn.addEventListener("click", submit);
+  input.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") submit();
+    if(e.key === "Escape") closeModal();
+  });
+  document.getElementById("nameModalCancel").addEventListener("click", closeModal);
+  document.getElementById("nameModalBackdrop").addEventListener("click", (e)=>{
+    if(e.target.id === "nameModalBackdrop") closeModal();
+  });
+}
+
+function showListDeleteModal(id){
+  const kg = getKg(id);
+  if(!kg) return;
+  const name = esc(kg.name || "이름 미입력");
+  document.getElementById("modalRoot").innerHTML = `
+  <div class="modal-backdrop" id="listDeleteBackdrop">
+    <div class="modal-box">
+      <div class="modal-title jua">기록 삭제</div>
+      <div class="modal-body"><b>${name}</b> 기록을 삭제할까요?<br>삭제한 기록은 복구할 수 없습니다.</div>
+      <div class="modal-actions">
+        <button class="confirm" id="listDeleteCancel">취소</button>
+        <button class="cancel" id="listDeleteConfirm" style="color:var(--coral);">삭제</button>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById("listDeleteCancel").addEventListener("click", closeModal);
+  document.getElementById("listDeleteConfirm").addEventListener("click", ()=>{
+    data.kindergartens = data.kindergartens.filter(k=>k.id!==id);
+    if(selId === id){ selId = null; view = "list"; }
+    save();
+    closeModal();
+    render();
+  });
+  document.getElementById("listDeleteBackdrop").addEventListener("click", (e)=>{
+    if(e.target.id === "listDeleteBackdrop") closeModal();
   });
 }
 
