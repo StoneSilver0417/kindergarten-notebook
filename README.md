@@ -4,7 +4,7 @@
 
 ### 우리 아이의 소중한 성장 기록
 
-![HTML](https://img.shields.io/badge/HTML-Single%20File-FFD66B?style=for-the-badge)
+![HTML](https://img.shields.io/badge/HTML-Vanilla-FFD66B?style=for-the-badge)
 ![Responsive](https://img.shields.io/badge/Mobile-Responsive-6BBF8A?style=for-the-badge)
 ![Storage](https://img.shields.io/badge/Storage-LocalStorage-5FAF7B?style=for-the-badge)
 ![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Ready-222222?style=for-the-badge)
@@ -213,6 +213,8 @@ https://stonesilver0417.github.io/kindergarten-notebook/
 ```text
 .
 ├── index.html
+├── styles.css
+├── app.js
 ├── manifest.webmanifest
 ├── sw.js
 ├── icon-192.png
@@ -230,7 +232,7 @@ https://stonesilver0417.github.io/kindergarten-notebook/
 - LocalStorage
 - GitHub Pages
 
-외부 CSS와 JavaScript 없이 `index.html` 파일 하나로 실행됩니다.
+외부 프레임워크나 서버 없이 정적 파일만으로 실행됩니다.
 
 ---
 
@@ -238,8 +240,21 @@ https://stonesilver0417.github.io/kindergarten-notebook/
 
 ```text
 .
-├── index.html
+├── index.html               # 앱 화면 뼈대
+├── styles.css              # 반응형 화면 스타일
+├── app.js                  # 평가·저장·백업 기능
+├── manifest.webmanifest    # PWA 설치 정보
+├── sw.js                   # 오프라인 캐시와 업데이트
+├── scripts/
+│   └── check-basic.cjs     # 기본 구조·문법 검사
+├── package.json
 └── README.md
+```
+
+기본 점검은 별도 패키지 설치 없이 실행할 수 있습니다.
+
+```bash
+npm run check
 ```
 
 ---

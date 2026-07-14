@@ -1,0 +1,7 @@
+{
+  "name": "kindergarten-notebook",
+  "private": true,
+  "scripts": {
+    "check": "node scripts/check-basic.cjs"
+  }
+}

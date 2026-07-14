@@ -1,7 +1,9 @@
-const CACHE_NAME = "kindergarten-notebook-v1";
+const CACHE_NAME = "kindergarten-notebook-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./styles.css",
+  "./app.js",
   "./manifest.webmanifest",
   "./icon-192.png",
   "./icon-512.png",
@@ -33,14 +35,17 @@ self.addEventListener("message", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
 
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request)
         .then(response => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));
-          return response;
+          return caches.open(CACHE_NAME)
+            .then(cache => cache.put("./index.html", copy))
+            .then(() => response);
         })
         .catch(() => caches.match("./index.html"))
     );
@@ -57,7 +62,10 @@ self.addEventListener("fetch", event => {
           }
           return response;
         })
-        .catch(() => cached);
+        .catch(error => {
+          if (cached) return cached;
+          throw error;
+        });
       return cached || network;
     })
   );
