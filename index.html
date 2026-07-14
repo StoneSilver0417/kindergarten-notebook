@@ -690,7 +690,7 @@ nav.bottom{
 
 /* 홈 화면 추가 안내 */
 .install-card{
-  margin:0 0 18px;
+  margin:22px 0 18px;
   padding:16px;
   display:flex;
   align-items:center;
@@ -701,13 +701,13 @@ nav.bottom{
   box-shadow:var(--shadow-sm);
 }
 .install-card-icon{
-  width:54px;
-  height:54px;
-  flex:0 0 54px;
+  width:48px;
+  height:48px;
+  flex:0 0 48px;
   border-radius:17px;
   display:grid;
   place-items:center;
-  font-size:27px;
+  font-size:23px;
   background:var(--greenTint);
   box-shadow:inset 0 0 0 1px rgba(107,191,138,.18);
 }
@@ -1009,16 +1009,7 @@ function stampHtml(score, size){
 function renderList(){
   const kgs = data.kindergartens;
   let html = "";
-  if(!isStandaloneMode()){
-    html += `<section class="install-card" id="installCard">
-      <div class="install-card-icon">📲</div>
-      <div class="install-card-copy">
-        <h2 class="install-card-title">홈 화면에 추가</h2>
-        <p class="install-card-desc">자주 사용한다면 아이콘을 홈 화면에 추가해 앱처럼 바로 열 수 있어요.</p>
-      </div>
-      <button class="install-btn" id="installGuideBtn">추가 방법</button>
-    </section>`;
-  }
+
   html += `<div class="toolbar">
     <button class="tool-btn" id="exportBtn">📒 내보내기</button>
     <button class="tool-btn" id="importBtn">📂 불러오기</button>
@@ -1051,6 +1042,17 @@ function renderList(){
   html += `<button class="add-btn jua" id="addKgBtn">🌱 유치원 추가</button>`;
   html += `<p class="hint">💡 방문 전엔 <b>유치원알리미</b>에서 원비·학급 인원·교사 근속을 미리 확인하고,
     11월 <b>처음학교로</b> 접수 때 1·2·3지망을 정해야 하니 3곳 이상 비교해 두면 좋아요.</p>`;
+
+  if(!isStandaloneMode()){
+    html += `<section class="install-card" id="installCard">
+      <div class="install-card-icon">📲</div>
+      <div class="install-card-copy">
+        <h2 class="install-card-title">홈 화면에 추가</h2>
+        <p class="install-card-desc">유치원 기록을 확인한 뒤, 자주 사용한다면 홈 화면에 추가해 앱처럼 바로 열 수 있어요.</p>
+      </div>
+      <button class="install-btn" id="installGuideBtn">추가 방법</button>
+    </section>`;
+  }
 
   html += `<section class="usage-guide" aria-labelledby="usageGuideTitle">
     <h2 id="usageGuideTitle">📱 처음 사용하는 분을 위한 안내</h2>
