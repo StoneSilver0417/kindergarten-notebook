@@ -1030,11 +1030,13 @@ nav.bottom{
   position:relative;
 }
 .kg-card-actions{
-  display:flex;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:8px;
   margin-top:12px;
 }
 .kg-action-btn{
+  width:100%;
   min-height:38px;
   padding:0 12px;
   border-radius:12px;
@@ -1047,6 +1049,7 @@ nav.bottom{
   align-items:center;
   justify-content:center;
   gap:6px;
+  white-space:nowrap;
   transition:transform .12s ease,box-shadow .18s ease,background .18s ease;
 }
 .kg-action-btn:active{
@@ -1073,6 +1076,7 @@ nav.bottom{
   text-align:left;
 }
 .kg-card-shell{
+  display:block;
   padding:16px;
 }
 .name-modal-input{
@@ -1094,5 +1098,4 @@ nav.bottom{
   .kg-card-shell{padding:15px 13px;}
   .kg-card-open{gap:11px;}
   .kg-card-actions{margin-top:11px;}
-  .kg-action-btn{flex:1;}
 }

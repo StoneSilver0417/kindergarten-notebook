@@ -302,8 +302,8 @@ function renderList(){
         <span class="chev">${icon("chevron","icon-sm")}</span>
       </button>
       <div class="kg-card-actions">
-        <button class="kg-action-btn" data-rename="${kg.id}">${icon("notebook","icon-sm")} 이름 수정</button>
-        <button class="kg-action-btn danger" data-delete-list="${kg.id}">${icon("trash","icon-sm")} 삭제</button>
+        <button class="kg-action-btn" data-rename="${kg.id}">수정</button>
+        <button class="kg-action-btn danger" data-delete-list="${kg.id}">삭제</button>
       </div>
     </article>`;
   });
