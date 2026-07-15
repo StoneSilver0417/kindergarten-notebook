@@ -2,7 +2,7 @@
 
 # 🌿 유치원 수첩
 
-### 우리 아이의 소중한 성장 기록
+### 우리 아이에게 맞는 유치원 선택 기록
 
 ![HTML](https://img.shields.io/badge/HTML-Vanilla-FFD66B?style=for-the-badge)
 ![Responsive](https://img.shields.io/badge/Mobile-Responsive-6BBF8A?style=for-the-badge)
