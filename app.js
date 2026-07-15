@@ -26,7 +26,7 @@ const CATEGORIES = [
   { id:"safety", name:"안전·적응", weight:20, items:[
     ["만3세 입학 적응 프로그램이 아이별로 구체적이다", "Q", "처음 2주 동안 계속 울거나 교실 입장을 거부하면 어떤 순서로 돕고, 부모에게는 언제 알려주시나요?"],
     ["배변실수 대응이 세심하다", "Q", "배변 실수하면 어떻게 대응해주시나요? 여벌옷은 저희가 보내나요?"],
-    ["낮잠·휴식 운영이 아이에게 맞다", "Q", "낮잠이나 휴식 시간은 어떻게 운영되나요?"],
+    ["피곤하거나 힘든 아이가 조용히 쉴 수 있다", "Q", "낮잠 시간 없이 운영할 때 피곤하거나 정서적으로 힘들어하는 아이는 어디에서 어떻게 쉬게 하나요?"],
     ["안전훈련을 정기적으로 한다", "R", "유치원알리미에서 안전교육 계획·실시 현황과 최근 안전점검 결과 확인"],
     ["훈육·생활지도 방식이 아이를 존중한다", "Q", "아이가 반복해서 규칙을 지키지 않을 때 어떤 순서와 방법으로 지도하시나요?"],
     ["다툼·상처·사고를 기준에 따라 신속히 공유한다", "Q", "아이가 다치거나 심한 갈등이 생기면 어느 정도 상황부터 누가, 언제, 어떤 방식으로 부모에게 알리나요?"],
@@ -76,7 +76,7 @@ const INFO_GROUPS = [
     ["특별활동 / 비용","예: 영어 별도 5만원"],
   ]},
   { name:"생활·적응", fields:[
-    ["낮잠/휴식 운영","예: 낮잠 없음, 휴식 30분"],["입학 초 적응 프로그램","예: 첫 2주 단축수업"],
+    ["조용한 휴식 지원","예: 휴식 공간에서 개별 안정"],["입학 초 적응 프로그램","예: 첫 2주 단축수업"],
     ["배변실수 등 생활지도","예: 여벌옷 보관"],
   ]},
   { name:"소통·입학", fields:[
@@ -90,10 +90,13 @@ const FINAL_Q = [
   { v:1, label:"다른 유치원이 더 끌린다" },
 ];
 const APP_ID = "dojun-kg-notebook";
-const DATA_VERSION = 4;
+const DATA_VERSION = 5;
 const STORAGE_KEY = "dojun-kg-notebook-v2";
 const SCORE_KEYS = new Set(CATEGORIES.flatMap(cat =>
   cat.items.map((_, index) => `${cat.id}-${index}`)
+));
+const OBSERVATION_SCORE_KEYS = new Set(CATEGORIES.flatMap(cat =>
+  cat.items.flatMap((item, index) => item[1] === "O" ? [`${cat.id}-${index}`] : [])
 ));
 const INFO_KEYS = new Set(INFO_GROUPS.flatMap(group =>
   group.fields.map(([label]) => label)
@@ -184,6 +187,8 @@ function normalizeKg(raw, usedIds){
       const score = Number(value);
       if(SCORE_KEYS.has(key) && Number.isInteger(score) && score >= 1 && score <= 5){
         scores[key] = score;
+      }else if(OBSERVATION_SCORE_KEYS.has(key) && value === "N"){
+        scores[key] = "N";
       }
     });
   }
@@ -240,10 +245,14 @@ function updateKg(id, patch){
   save(); render();
 }
 function catScore(kg, cat){
-  const vals = cat.items.map((_,i)=>kg.scores[cat.id+"-"+i]).filter(v=>v>=1);
-  if(!vals.length) return null;
+  const vals = cat.items.map((_,i)=>kg.scores[cat.id+"-"+i]);
+  const numericVals = vals.filter(v=>Number.isInteger(v) && v>=1 && v<=5);
+  const unobserved = vals.filter(v=>v==="N").length;
+  if(!numericVals.length) return null;
   // 미입력 항목은 아직 확보하지 못한 점수로 보아 영역 만점을 부여하지 않는다.
-  return Math.round((vals.reduce((a,b)=>a+b,0)/(cat.items.length*5))*cat.weight*10)/10;
+  // 관찰 기회가 없었던 항목은 유치원의 결함이 아니므로 중립값 3점으로 반영한다.
+  const sum = numericVals.reduce((a,b)=>a+b,0) + unobserved*3;
+  return Math.round((sum/(cat.items.length*5))*cat.weight*10)/10;
 }
 function totalScore(kg){
   let sum=0, any=false;
@@ -251,6 +260,7 @@ function totalScore(kg){
   return any ? Math.round(sum*10)/10 : null;
 }
 function filledCount(kg){ return Object.values(kg.scores).filter(v=>v>=1).length; }
+function unobservedCount(kg){ return Object.values(kg.scores).filter(v=>v==="N").length; }
 function disqCount(kg){ return DISQ.filter((_,i)=>kg.disq[i]==="X").length; }
 function esc(s){ return (s||"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
 
@@ -295,6 +305,7 @@ function renderList(){
     const total = totalScore(kg);
     const dq = disqCount(kg);
     const filled = filledCount(kg);
+    const unobserved = unobservedCount(kg);
     const isBlank = !kg.name && filled===0 && !kg.memo && Object.keys(kg.info||{}).length===0 && Object.values(kg.disq||{}).every(v=>!v);
     html += `<article class="card kg-card kg-card-shell">
       <button class="kg-card-open" data-open="${kg.id}" aria-label="${esc(kg.name)||'이름 미입력'} 기록 열기">
@@ -302,7 +313,8 @@ function renderList(){
         <div class="kg-card-main">
           <div class="jua kg-name" style="color:${kg.name?'var(--ink)':'var(--sub)'}">${esc(kg.name)||'이름 미입력'}</div>
           <div class="kg-meta">
-            <span>평가 ${filled}/${TOTAL_ITEMS}</span>
+            <span>평가 ${filled+unobserved}/${TOTAL_ITEMS}</span>
+            ${unobserved>0?`<span>관찰 못함 ${unobserved}</span>`:''}
             ${kg.firstImpression>0?`<span style="color:#C9971C">${'★'.repeat(kg.firstImpression)}</span>`:''}
             ${dq>0?`<span style="color:var(--coral); font-weight:700;">결격 ${dq}건</span>`:''}
             ${kg.finalQ===3?`<span style="color:var(--green); font-weight:700;">바로 선택</span>`:''}
@@ -400,7 +412,7 @@ function renderDetail(kg){
 
   let body = "";
   if(detailTab==="score"){
-    body += `<p class="hint" style="margin-top:10px;">녹음을 들으며 한 항목씩 눌러 주세요. <b>1=아니다 · 3=보통 · 5=매우 그렇다</b>. 미입력 항목은 총점에 포함되지 않으므로 평가 진행도도 함께 확인하세요.</p>`;
+    body += `<p class="hint" style="margin-top:10px;">녹음을 들으며 한 항목씩 눌러 주세요. <b>1=아니다 · 3=보통 · 5=매우 그렇다</b>. 관찰 기회가 없으면 <b>관찰 못함</b>을 선택하세요. 총점에는 중립 3점으로 반영되고 별도 표시됩니다.</p>`;
     CATEGORIES.forEach(cat=>{
       const cs = catScore(kg, cat);
       body += `<div class="section-title">
@@ -422,6 +434,9 @@ function renderDetail(kg){
           <div class="chips">`;
         for(let n=1;n<=5;n++){
           body += `<button class="chip ${val===n?'on':''}" data-score-cat="${cat.id}" data-score-idx="${i}" data-score-val="${n}">${n}</button>`;
+        }
+        if(type === "O"){
+          body += `<button class="chip-na ${val==='N'?'on':''}" data-score-cat="${cat.id}" data-score-idx="${i}" data-score-val="N">관찰 못함</button>`;
         }
         body += `</div></div>`;
       });
@@ -589,7 +604,7 @@ function renderCompare(){
     ${kgs.map(k=>`<td style="font-size:12px;">${k.finalQ===3?'네!':k.finalQ===2?'고민':k.finalQ===1?'다른 곳':'—'}</td>`).join('')}
     </tr>
     <tr><td class="label-col">평가 진행</td>
-    ${kgs.map(k=>`<td style="color:var(--sub); font-size:12px;">${filledCount(k)}/${TOTAL_ITEMS}</td>`).join('')}
+    ${kgs.map(k=>`<td style="color:var(--sub); font-size:12px;">${filledCount(k)+unobservedCount(k)}/${TOTAL_ITEMS}${unobservedCount(k)>0?`<br>관찰 못함 ${unobservedCount(k)}`:''}</td>`).join('')}
     </tr>
     </tbody></table></div>`;
 
@@ -700,7 +715,7 @@ function bindEvents(){
     el.addEventListener("click", ()=>{
       const kg = getKg(selId);
       const key = el.dataset.scoreCat+"-"+el.dataset.scoreIdx;
-      const v = parseInt(el.dataset.scoreVal,10);
+      const v = el.dataset.scoreVal === "N" ? "N" : parseInt(el.dataset.scoreVal,10);
       if(kg.scores[key] === v) delete kg.scores[key];
       else kg.scores[key] = v;
       touch(kg); save(); render();
