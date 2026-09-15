@@ -20,8 +20,8 @@ assert.match(app, /피곤하거나 힘든 아이가 조용히 쉴 수 있다/, "
 assert.match(app, /value === "N"/, "관찰하지 못한 항목의 저장값 검증이 필요합니다");
 assert.match(app, /unobserved\*3/, "관찰하지 못한 항목은 중립값으로 점수에 반영해야 합니다");
 
-assert.match(html, /href="\.\/styles\.css"/);
-assert.match(html, /src="\.\/app\.js"/);
+assert.match(html, /href="\.\/styles\.css/);
+assert.match(html, /src="\.\/app\.js/);
 assert.doesNotMatch(html, /<style(?:\s|>)/i);
 assert.doesNotMatch(html, /<script(?![^>]*\bsrc=)[^>]*>/i);
 

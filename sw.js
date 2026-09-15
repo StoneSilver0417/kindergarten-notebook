@@ -2,8 +2,8 @@ const CACHE_NAME = "kindergarten-notebook-v10-compact-btn";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css",
   "./app.js",
+  "./styles.css",
   "./manifest.webmanifest",
   "./icon-192.png",
   "./icon-512.png",
