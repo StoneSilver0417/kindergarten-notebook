@@ -722,7 +722,7 @@ function render(){
 
   if(view==="dashboard"){
     backBtn.style.display = "none";
-    subtitle.textContent = "2027학년도 입학 준비 - 대시보드";
+    subtitle.textContent = "2027학년도 입학 준비 - 연락 대시보드";
     main.innerHTML = renderDashboard();
   } else if(view==="list"){
     backBtn.style.display = "none";
