@@ -105,7 +105,7 @@ const FINAL_VALUES = new Set(FINAL_Q.map(item => item.v));
 
 /* ============ 상태 ============ */
 let data = { kindergartens: [] };
-let view = "list";
+let view = "dashboard";
 let selId = null;
 let detailTab = "score";
 let openInfoGroup = 0;
@@ -286,7 +286,8 @@ function stampHtml(score, size){
   </div>`;
 }
 
-function renderList(){
+/* ============ 뷰 렌더링 ============ */
+function renderDashboard(){
   const kgs = data.kindergartens;
   let html = "";
 
@@ -295,7 +296,6 @@ function renderList(){
     <button class="tool-btn" id="importBtn">📂 불러오기</button>
   </div>`;
 
-  // 연락/상담 일정 요약 대시보드
   let countTotal = kgs.length;
   let countNotContacted = 0;
   let countContacted = 0;
@@ -310,30 +310,70 @@ function renderList(){
     else if (status === "상담완료") countCompleted++;
   });
 
-  html += `<div class="card" style="padding:16px; margin-bottom:16px; background:var(--card);">
-    <div style="font-weight:700; font-size:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-      <span>📞 상담 일정 및 연락 현황</span>
+  html += `<div class="card" style="padding:18px; margin-bottom:16px; background:var(--card);">
+    <div style="font-weight:700; font-size:16px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+      <span class="jua">📞 상담 일정 및 연락 현황</span>
       <span style="font-size:12px; color:var(--sub); font-weight:normal;">총 ${countTotal}곳</span>
     </div>
     <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; text-align:center;">
-      <div style="padding:8px 4px; background:var(--paper); border-radius:10px;">
-        <div style="font-size:11px; color:var(--sub); margin-bottom:2px;">미연락</div>
-        <div style="font-size:16px; font-weight:800; color:var(--coral);">${countNotContacted}</div>
+      <div style="padding:10px 4px; background:var(--paper); border-radius:10px;">
+        <div style="font-size:11px; color:var(--sub); margin-bottom:4px;">미연락</div>
+        <div style="font-size:18px; font-weight:800; color:var(--coral);">${countNotContacted}</div>
       </div>
-      <div style="padding:8px 4px; background:var(--paper); border-radius:10px;">
-        <div style="font-size:11px; color:var(--sub); margin-bottom:2px;">연락완료</div>
-        <div style="font-size:16px; font-weight:800; color:#3B82F6;">${countContacted}</div>
+      <div style="padding:10px 4px; background:var(--paper); border-radius:10px;">
+        <div style="font-size:11px; color:var(--sub); margin-bottom:4px;">연락완료</div>
+        <div style="font-size:18px; font-weight:800; color:#3B82F6;">${countContacted}</div>
       </div>
-      <div style="padding:8px 4px; background:var(--paper); border-radius:10px;">
-        <div style="font-size:11px; color:var(--sub); margin-bottom:2px;">상담예정</div>
-        <div style="font-size:16px; font-weight:800; color:#8B5CF6;">${countScheduled}</div>
+      <div style="padding:10px 4px; background:var(--paper); border-radius:10px;">
+        <div style="font-size:11px; color:var(--sub); margin-bottom:4px;">상담예정</div>
+        <div style="font-size:18px; font-weight:800; color:#8B5CF6;">${countScheduled}</div>
       </div>
-      <div style="padding:8px 4px; background:var(--paper); border-radius:10px;">
-        <div style="font-size:11px; color:var(--sub); margin-bottom:2px;">상담완료</div>
-        <div style="font-size:16px; font-weight:800; color:var(--green);">${countCompleted}</div>
+      <div style="padding:10px 4px; background:var(--paper); border-radius:10px;">
+        <div style="font-size:11px; color:var(--sub); margin-bottom:4px;">상담완료</div>
+        <div style="font-size:18px; font-weight:800; color:var(--green);">${countCompleted}</div>
       </div>
     </div>
   </div>`;
+
+  html += `<div style="font-weight:700; font-size:15px; margin-bottom:10px; margin-top:20px;" class="jua">📋 유치원별 상담 일정 관리</div>`;
+
+  if(kgs.length===0){
+    html += `<div class="empty-state">
+      <div class="emoji">🌱</div>
+      <p class="jua lead">등록된 유치원이 없습니다</p>
+      <p>유치원 목록 탭에서 첫 유치원을 추가해 보세요.</p>
+    </div>`;
+  } else {
+    kgs.forEach(kg => {
+      const status = kg.contactStatus || "미연락";
+      const statusColor = status==='상담완료'?'var(--green)':status==='상담예정'?'#8B5CF6':status==='연락완료'?'#3B82F6':'var(--coral)';
+      
+      html += `<div class="card" style="padding:14px; margin-bottom:10px; background:var(--card); display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-weight:700; font-size:15px;" class="jua">${esc(kg.name || "이름 미입력")}</div>
+          <div style="font-size:12px; margin-top:4px;">
+            <span style="font-weight:700; color:${statusColor};">[${status}]</span>
+            ${kg.consultDate ? `<span style="color:var(--sub); margin-left:6px;">📅 ${esc(kg.consultDate)}</span>` : ''}
+          </div>
+          ${kg.contactMemo ? `<div style="font-size:12px; color:var(--sub); margin-top:4px;">📝 ${esc(kg.contactMemo)}</div>` : ''}
+        </div>
+        <button class="kg-action-btn" data-contact="${kg.id}" style="padding:6px 12px; font-size:12px;">📞 일정 설정</button>
+      </div>`;
+    });
+  }
+
+  return html;
+}
+
+function renderList(){
+  const kgs = data.kindergartens;
+  let html = "";
+
+  html += `<div class="toolbar">
+    <button class="tool-btn" id="exportBtn">내보내기</button>
+    <button class="tool-btn" id="importBtn">📂 불러오기</button>
+  </div>`;
+
   if(kgs.length===0){
     html += `<div class="empty-state">
       <div class="emoji">🌱</div>
@@ -660,6 +700,7 @@ function renderCompare(){
 function injectStaticIcons(){
   const map = {
     eyebrowIcon:["leaf","icon-sm"],
+    navDashboardIcon:["bar-chart","icon-md"],
     navListIcon:["notebook","icon-md"],
     navCompareIcon:["scale","icon-md"]
   };
@@ -679,9 +720,13 @@ function render(){
     btn.classList.toggle("active", view===v || (v==="list" && view==="detail"));
   });
 
-  if(view==="list"){
+  if(view==="dashboard"){
     backBtn.style.display = "none";
-    subtitle.textContent = "2027학년도 입학 준비";
+    subtitle.textContent = "2027학년도 입학 준비 - 대시보드";
+    main.innerHTML = renderDashboard();
+  } else if(view==="list"){
+    backBtn.style.display = "none";
+    subtitle.textContent = "2027학년도 입학 준비 - 목록";
     main.innerHTML = renderList();
   } else if(view==="detail"){
     backBtn.style.display = "inline-block";
