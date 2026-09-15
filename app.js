@@ -349,16 +349,16 @@ function renderDashboard(){
       const status = kg.contactStatus || "미연락";
       const statusColor = status==='상담완료'?'var(--green)':status==='상담예정'?'#8B5CF6':status==='연락완료'?'#3B82F6':'var(--coral)';
       
-      html += `<div class="card" style="padding:14px; margin-bottom:10px; background:var(--card); display:flex; justify-content:space-between; align-items:center; gap:12px;">
-        <div style="flex:1; min-width:0;">
-          <div style="font-weight:700; font-size:15px; word-break:break-all;" class="jua">${esc(kg.name || "이름 미입력")}</div>
+      html += `<div class="card" style="padding:14px; margin-bottom:10px; background:var(--card); display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <div style="flex:1; min-width:0; padding-right:4px;">
+          <div style="font-weight:700; font-size:15px; word-break:keep-all; overflow-wrap:anywhere; line-height:1.3;" class="jua">${esc(kg.name || "이름 미입력")}</div>
           <div style="font-size:12px; margin-top:4px;">
             <span style="font-weight:700; color:${statusColor};">[${status}]</span>
-            ${kg.consultDate ? `<span style="color:var(--sub); margin-left:6px;">📅 ${esc(kg.consultDate)}</span>` : ''}
+            ${kg.consultDate ? `<span style="color:var(--sub); margin-left:6px; white-space:nowrap;">📅 ${esc(kg.consultDate)}</span>` : ''}
           </div>
           ${kg.contactMemo ? `<div style="font-size:12px; color:var(--sub); margin-top:4px; word-break:break-all;">📝 ${esc(kg.contactMemo)}</div>` : ''}
         </div>
-        <button class="kg-action-btn" data-contact="${kg.id}" style="padding:8px 10px; font-size:12px; shrink:0; white-space:nowrap;">📞 일정 설정</button>
+        <button class="kg-action-btn" data-contact="${kg.id}" style="padding:6px 8px; font-size:11px; flex-shrink:0; white-space:nowrap; width:auto; max-width:80px; text-align:center; height:fit-content;">📞 설정</button>
       </div>`;
     });
   }
