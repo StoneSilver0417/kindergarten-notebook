@@ -294,6 +294,46 @@ function renderList(){
     <button class="tool-btn" id="exportBtn">내보내기</button>
     <button class="tool-btn" id="importBtn">📂 불러오기</button>
   </div>`;
+
+  // 연락/상담 일정 요약 대시보드
+  let countTotal = kgs.length;
+  let countNotContacted = 0;
+  let countContacted = 0;
+  let countScheduled = 0;
+  let countCompleted = 0;
+
+  kgs.forEach(kg => {
+    const status = kg.contactStatus || "미연락";
+    if (status === "미연락") countNotContacted++;
+    else if (status === "연락완료") countContacted++;
+    else if (status === "상담예정") countScheduled++;
+    else if (status === "상담완료") countCompleted++;
+  });
+
+  html += `<div class="card" style="padding:16px; margin-bottom:16px; background:var(--card);">
+    <div style="font-weight:700; font-size:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+      <span>📞 상담 일정 및 연락 현황</span>
+      <span style="font-size:12px; color:var(--sub); font-weight:normal;">총 ${countTotal}곳</span>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; text-align:center;">
+      <div style="padding:8px 4px; background:var(--paper); border-radius:10px;">
+        <div style="font-size:11px; color:var(--sub); margin-bottom:2px;">미연락</div>
+        <div style="font-size:16px; font-weight:800; color:var(--coral);">${countNotContacted}</div>
+      </div>
+      <div style="padding:8px 4px; background:var(--paper); border-radius:10px;">
+        <div style="font-size:11px; color:var(--sub); margin-bottom:2px;">연락완료</div>
+        <div style="font-size:16px; font-weight:800; color:#3B82F6;">${countContacted}</div>
+      </div>
+      <div style="padding:8px 4px; background:var(--paper); border-radius:10px;">
+        <div style="font-size:11px; color:var(--sub); margin-bottom:2px;">상담예정</div>
+        <div style="font-size:16px; font-weight:800; color:#8B5CF6;">${countScheduled}</div>
+      </div>
+      <div style="padding:8px 4px; background:var(--paper); border-radius:10px;">
+        <div style="font-size:11px; color:var(--sub); margin-bottom:2px;">상담완료</div>
+        <div style="font-size:16px; font-weight:800; color:var(--green);">${countCompleted}</div>
+      </div>
+    </div>
+  </div>`;
   if(kgs.length===0){
     html += `<div class="empty-state">
       <div class="emoji">🌱</div>
@@ -313,6 +353,7 @@ function renderList(){
         <div class="kg-card-main">
           <div class="jua kg-name" style="color:${kg.name?'var(--ink)':'var(--sub)'}">${esc(kg.name)||'이름 미입력'}</div>
           <div class="kg-meta">
+            <span style="font-weight:700; color:${kg.contactStatus==='상담완료'?'var(--green)':kg.contactStatus==='상담예정'?'#8B5CF6':kg.contactStatus==='연락완료'?'#3B82F6':'var(--coral)'};">[${kg.contactStatus||'미연락'}${kg.consultDate ? ' (' + kg.consultDate + ')' : ''}]</span>
             <span>평가 ${filled+unobserved}/${TOTAL_ITEMS}</span>
             ${unobserved>0?`<span>관찰 못함 ${unobserved}</span>`:''}
             ${kg.firstImpression>0?`<span style="color:#C9971C">${'★'.repeat(kg.firstImpression)}</span>`:''}
@@ -324,6 +365,7 @@ function renderList(){
         <span class="chev">${icon("chevron","icon-sm")}</span>
       </button>
       <div class="kg-card-actions">
+        <button class="kg-action-btn" data-contact="${kg.id}">📞 상담/연락 설정</button>
         <button class="kg-action-btn" data-rename="${kg.id}">수정</button>
         <button class="kg-action-btn danger" data-delete-list="${kg.id}">삭제</button>
       </div>
@@ -665,6 +707,13 @@ function bindEvents(){
     });
   });
 
+  main.querySelectorAll("[data-contact]").forEach(el=>{
+    el.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      showContactModal(el.dataset.contact);
+    });
+  });
+
   main.querySelectorAll("[data-rename]").forEach(el=>{
     el.addEventListener("click", (e)=>{
       e.stopPropagation();
@@ -784,6 +833,69 @@ function bindEvents(){
   });
 }
 
+
+/* ============ 유치원 상담/연락 설정 모달 ============ */
+function showContactModal(id){
+  modalReturnFocus = document.activeElement;
+  const kg = getKg(id);
+  if(!kg) return;
+
+  const currentStatus = kg.contactStatus || "미연락";
+  const currentDate = kg.consultDate || "";
+  const currentMemo = kg.contactMemo || "";
+
+  document.getElementById("modalRoot").innerHTML = `
+  <div class="modal-backdrop" id="contactModalBackdrop">
+    <div class="modal-box">
+      <div class="modal-title jua">📞 ${esc(kg.name || "유치원")} 상담/연락 설정</div>
+      <div style="font-size:13px; color:var(--sub); margin-bottom:14px;">유치원에 연락했는지, 상담 일정이 언제인지 입력할 수 있습니다.</div>
+      
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px; font-weight:700; color:var(--sub); display:block; margin-bottom:4px;">연락 상태</label>
+        <select id="contactStatusSelect" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); font-size:14px; background:var(--card);">
+          <option value="미연락" ${currentStatus==='미연락'?'selected':''}>미연락 (아직 연락 전)</option>
+          <option value="연락완료" ${currentStatus==='연락완료'?'selected':''}>연락완료 (상담/입학 설명회 문의 완료)</option>
+          <option value="상담예정" ${currentStatus==='상담예정'?'selected':''}>상담예정 (방문/상담 일정 확정)</option>
+          <option value="상담완료" ${currentStatus==='상담완료'?'selected':''}>상담완료 (상담 마침)</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px; font-weight:700; color:var(--sub); display:block; margin-bottom:4px;">상담 / 방문 예정일</label>
+        <input type="date" id="contactDateInput" value="${esc(currentDate)}" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); font-size:14px; background:var(--card);">
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px; font-weight:700; color:var(--sub); display:block; margin-bottom:4px;">연락 / 상담 메모</label>
+        <textarea id="contactMemoInput" placeholder="담당 선생님 연락처, 문의 내용, 준비물 등" style="width:100%; height:70px; padding:10px; border-radius:10px; border:1px solid var(--line); font-size:13px; resize:none; background:var(--card);">${esc(currentMemo)}</textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="confirm" id="contactModalSave">저장</button>
+        <button class="cancel" id="contactModalCancel">취소</button>
+      </div>
+    </div>
+  </div>`;
+
+  const saveBtn = document.getElementById("contactModalSave");
+  const cancelBtn = document.getElementById("contactModalCancel");
+
+  saveBtn.addEventListener("click", ()=>{
+    kg.contactStatus = document.getElementById("contactStatusSelect").value;
+    kg.consultDate = document.getElementById("contactDateInput").value;
+    kg.contactMemo = document.getElementById("contactMemoInput").value;
+    touch(kg);
+    save(true);
+    closeModal();
+    render();
+    toast("상담 정보가 저장되었습니다.");
+  });
+
+  cancelBtn.addEventListener("click", closeModal);
+  document.getElementById("contactModalBackdrop").addEventListener("click", (e)=>{
+    if(e.target.id === "contactModalBackdrop") closeModal();
+  });
+}
 
 /* ============ 유치원 추가·수정·삭제 모달 ============ */
 function showKgNameModal({mode, id}){
