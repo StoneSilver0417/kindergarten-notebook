@@ -1,4 +1,4 @@
-const CACHE_NAME = "kindergarten-notebook-v4";
+const CACHE_NAME = "kindergarten-notebook-v5-dashboard";
 const APP_SHELL = [
   "./",
   "./index.html",
