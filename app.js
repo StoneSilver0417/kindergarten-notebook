@@ -269,6 +269,7 @@ function icon(name, sizeClass){
     leaf:'<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 2 17 2c0 7-2 12-7 13"/><path d="M2 21c0-3 1.85-5.36 5.08-6.94C9.05 13.1 12 12 16 12"/>',
     notebook:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V5a2 2 0 0 1 2-2h5a3 3 0 0 1 3 3v15a3 3 0 0 0-3-3Z"/><path d="M21 18a1 1 0 0 0 1-1V5a2 2 0 0 0-2-2h-5a3 3 0 0 0-3 3v15a3 3 0 0 1 3-3Z"/>',
     scale:'<path d="m16 16 3-8 3 8a5 5 0 0 1-6 0"/><path d="m2 16 3-8 3 8a5 5 0 0 1-6 0"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h18"/>',
+    phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
     chevron:'<path d="m9 18 6-6-6-6"/>',
     trash:'<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/>',
   };
@@ -700,7 +701,7 @@ function renderCompare(){
 function injectStaticIcons(){
   const map = {
     eyebrowIcon:["leaf","icon-sm"],
-    navDashboardIcon:["bar-chart","icon-md"],
+    navDashboardIcon:["phone","icon-md"],
     navListIcon:["notebook","icon-md"],
     navCompareIcon:["scale","icon-md"]
   };
