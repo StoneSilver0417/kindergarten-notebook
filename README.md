@@ -11,6 +11,12 @@
 
 유치원 상담 내용과 평가 결과를 기록하고 여러 유치원을 한눈에 비교할 수 있는 모바일 우선 웹앱입니다.
 
+### 📱 미리보기
+
+| 📞 연락 대시보드 | 📒 유치원 목록 |
+| :---: | :---: |
+| <img src="./screenshot-dashboard.png" width="320" alt="연락 대시보드 화면" /> | <img src="./screenshot-list.png" width="320" alt="유치원 목록 화면" /> |
+
 ### 🚀 바로 사용하기
 
 https://stonesilver0417.github.io/kindergarten-notebook/
@@ -32,7 +38,12 @@ https://stonesilver0417.github.io/kindergarten-notebook/
 
 ---
 
-## ✨ 주요 기능
+### ✨ 주요 기능
+
+### 📞 연락 대시보드
+- 미연락 / 연락완료 / 상담예정 / 상담완료 4단계 현황 대시보드
+- 유치원별 상담/방문 예정일(날짜) 지정 및 초기화(미지정)
+- 담당자 연락처 및 개별 메모 관리
 
 ### 📒 유치원 관리
 - 여러 유치원 등록
