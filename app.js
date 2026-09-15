@@ -358,7 +358,7 @@ function renderDashboard(){
           </div>
           ${kg.contactMemo ? `<div style="font-size:12px; color:var(--sub); margin-top:4px; word-break:break-all;">📝 ${esc(kg.contactMemo)}</div>` : ''}
         </div>
-        <button class="kg-action-btn" data-contact="${kg.id}" style="padding:6px 8px; font-size:11px; flex-shrink:0; white-space:nowrap; width:auto; max-width:80px; text-align:center; height:fit-content;">📞 설정</button>
+        <button class="kg-action-btn" data-contact="${kg.id}" style="padding:10px 14px; font-size:13px; font-weight:700; flex-shrink:0; white-space:nowrap; width:auto; text-align:center; height:fit-content; background:var(--green-soft); color:var(--green-dark); border:1.5px solid var(--green-light); border-radius:10px;">📞 일정 설정</button>
       </div>`;
     });
   }
@@ -907,7 +907,10 @@ function showContactModal(id){
       </div>
 
       <div style="margin-bottom:12px;">
-        <label style="font-size:12px; font-weight:700; color:var(--sub); display:block; margin-bottom:4px;">상담 / 방문 예정일</label>
+        <div style="display:flex; justify-space-between; align-items:center; margin-bottom:4px;">
+          <label style="font-size:12px; font-weight:700; color:var(--sub);">상담 / 방문 예정일</label>
+          <button type="button" id="clearDateBtn" style="font-size:11px; padding:2px 6px; background:var(--line); border:none; border-radius:4px; color:var(--sub); cursor:pointer;">날짜 지우기 (초기화)</button>
+        </div>
         <input type="date" id="contactDateInput" value="${esc(currentDate)}" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); font-size:14px; background:var(--card);">
       </div>
 
@@ -925,6 +928,13 @@ function showContactModal(id){
 
   const saveBtn = document.getElementById("contactModalSave");
   const cancelBtn = document.getElementById("contactModalCancel");
+  const clearDateBtn = document.getElementById("clearDateBtn");
+
+  if(clearDateBtn){
+    clearDateBtn.addEventListener("click", ()=>{
+      document.getElementById("contactDateInput").value = "";
+    });
+  }
 
   saveBtn.addEventListener("click", ()=>{
     kg.contactStatus = document.getElementById("contactStatusSelect").value;
