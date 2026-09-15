@@ -358,7 +358,7 @@ function renderDashboard(){
           </div>
           ${kg.contactMemo ? `<div style="font-size:12px; color:var(--sub); margin-top:4px; word-break:break-all;">📝 ${esc(kg.contactMemo)}</div>` : ''}
         </div>
-        <button class="kg-action-btn" data-contact="${kg.id}" style="padding:10px 14px; font-size:13px; font-weight:700; flex-shrink:0; white-space:nowrap; width:auto; text-align:center; height:fit-content; background:var(--green-soft); color:var(--green-dark); border:1.5px solid var(--green-light); border-radius:10px;">📞 일정 설정</button>
+        <button class="kg-action-btn" data-contact="${kg.id}" style="width:auto; min-height:36px; padding:0 12px; flex-shrink:0;">📞 일정 설정</button>
       </div>`;
     });
   }
