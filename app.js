@@ -909,7 +909,7 @@ function showContactModal(id){
       <div style="margin-bottom:12px;">
         <div style="display:flex; justify-space-between; align-items:center; margin-bottom:4px;">
           <label style="font-size:12px; font-weight:700; color:var(--sub);">상담 / 방문 예정일</label>
-          <button type="button" id="clearDateBtn" style="font-size:11px; padding:2px 6px; background:var(--line); border:none; border-radius:4px; color:var(--sub); cursor:pointer;">날짜 지우기 (초기화)</button>
+          <button type="button" id="clearDateBtn" style="font-size:11px; padding:2px 6px; background:var(--line); border:none; border-radius:4px; color:var(--sub); cursor:pointer;">미지정</button>
         </div>
         <input type="date" id="contactDateInput" value="${esc(currentDate)}" style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); font-size:14px; background:var(--card);">
       </div>
