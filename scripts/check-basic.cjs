@@ -12,6 +12,31 @@ const manifest = JSON.parse(read("manifest.webmanifest"));
 new Function(app);
 new Function(serviceWorker);
 
+const appPrelude = app.slice(0, app.indexOf("function getKg"));
+const normalizeData = new Function(`${appPrelude}\nreturn normalizeData;`)();
+const normalizedSchedule = normalizeData({
+  kindergartens: [{
+    id: "schedule-test",
+    name: "테스트 유치원",
+    contactStatus: "상담예정",
+    consultDate: "2026-10-15",
+    contactMemo: "오후 2시 방문",
+  }],
+}).kindergartens[0];
+assert.deepEqual(
+  {
+    contactStatus: normalizedSchedule.contactStatus,
+    consultDate: normalizedSchedule.consultDate,
+    contactMemo: normalizedSchedule.contactMemo,
+  },
+  {
+    contactStatus: "상담예정",
+    consultDate: "2026-10-15",
+    contactMemo: "오후 2시 방문",
+  },
+  "저장된 상담 일정은 앱을 다시 불러와도 유지되어야 합니다",
+);
+
 assert.match(app, /\(cat\.items\.length\*5\)/, "미입력 항목을 제외한 평균으로 영역 만점을 부여하면 안 됩니다");
 assert.match(app, /label:"사전확인"/, "공시자료 확인 유형 표기가 필요합니다");
 assert.match(app, /다툼·상처·사고를 기준에 따라 신속히 공유한다/, "사고 통보 평가 항목이 필요합니다");

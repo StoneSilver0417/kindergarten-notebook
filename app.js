@@ -102,6 +102,7 @@ const INFO_KEYS = new Set(INFO_GROUPS.flatMap(group =>
   group.fields.map(([label]) => label)
 ));
 const FINAL_VALUES = new Set(FINAL_Q.map(item => item.v));
+const CONTACT_STATUSES = new Set(["미연락", "연락완료", "상담예정", "상담완료"]);
 
 /* ============ 상태 ============ */
 let data = { kindergartens: [] };
@@ -160,6 +161,7 @@ function newKg(){
     id: createId(),
     name:"", scores:{}, disq:{}, info:{},
     firstImpression:0, finalQ:0, memo:"",
+    contactStatus:"미연락", consultDate:"", contactMemo:"",
     updatedAt: Date.now(),
   };
 }
@@ -222,6 +224,9 @@ function normalizeKg(raw, usedIds){
     firstImpression: Number.isInteger(firstImpression) && firstImpression >= 0 && firstImpression <= 5 ? firstImpression : 0,
     finalQ: FINAL_VALUES.has(finalQ) ? finalQ : 0,
     memo: normalizeText(source.memo, 20000),
+    contactStatus: CONTACT_STATUSES.has(source.contactStatus) ? source.contactStatus : "미연락",
+    consultDate: typeof source.consultDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(source.consultDate) ? source.consultDate : "",
+    contactMemo: normalizeText(source.contactMemo, 20000),
     updatedAt: Number.isFinite(updatedAt) && updatedAt > 0 ? updatedAt : Date.now(),
   };
 }
